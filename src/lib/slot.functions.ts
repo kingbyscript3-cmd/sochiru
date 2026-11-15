@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import type { Database, Json } from '@/integrations/supabase/types';
-import { generateSlotRounds, prepareSpinSchema, randomServerSeed, sha256Hex, spinSchema } from './slot-engine';
+import { generateSlotRounds, prepareSpinSchema, randomServerSeed, sha256Hex, spinSchema, type SlotRound } from './slot-engine';
 
 function throwDb(error: { message: string } | null): never {
   throw new Error(error?.message || 'DATABASE_ERROR');
@@ -42,7 +42,7 @@ export const prepareSpin = createServerFn({ method: 'POST' }).middleware([requir
     return { sessionId: session.id, game: data.game, serverSeedHash, clientSeed: data.clientSeed, nonce: Number(session.nonce), rtp: Number(settings.rtp) };
   });
 
-type SpinResponse = { rounds: Array<{ reels: number[][] }>; balance: number };
+type SpinResponse = { rounds: SlotRound[]; balance: number };
 
 export const spin = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((input) => spinSchema.parse(input))
@@ -68,7 +68,7 @@ export const spin = createServerFn({ method: 'POST' }).middleware([requireSupaba
       spins: data.spins,
       rtp: Number(settings.rtp),
     });
-    const publicResponse = { rounds: rounds.map((round) => ({ reels: round.reels })), balance: 0 };
+    const publicResponse: SpinResponse = { rounds, balance: 0 };
     const { data: response, error } = await supabaseAdmin.rpc('play_slot_spins', {
       _session_id: data.sessionId,
       _request_id: data.requestId,

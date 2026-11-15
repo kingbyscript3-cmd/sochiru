@@ -2,10 +2,20 @@ import { z } from 'zod';
 
 export const SLOT_BET_VALUES = [0.20, 0.50, 1, 2, 5, 10, 15, 20, 25, 50, 100] as const;
 export const SLOT_SPIN_COUNTS = [1, 10, 100] as const;
-export const SLOT_SYMBOLS = 7;
+export const SLOT_SYMBOLS = 6;
 export const SPIN_RATE_LIMIT = 5;
 export const SPIN_RATE_WINDOW_SECONDS = 10;
 const WIN_CHANCE = 0.25;
+
+export const SLOT_PAYLINES = [
+  { id: 'middle', positions: [[0, 1], [1, 1], [2, 1]] },
+  { id: 'diagonalDown', positions: [[0, 0], [1, 1], [2, 2]] },
+  { id: 'diagonalUp', positions: [[0, 2], [1, 1], [2, 0]] },
+] as const;
+
+export type PaylineId = typeof SLOT_PAYLINES[number]['id'];
+export type WinningLine = { line: PaylineId; symbol: number };
+export type SlotRound = { reels: number[][]; payout: number; winningLines: WinningLine[] };
 
 export const clientSeedSchema = z.string().trim().min(1).max(64).regex(/^[a-zA-Z0-9_-]+$/);
 export const prepareSpinSchema = z.object({
@@ -20,10 +30,12 @@ export const spinSchema = z.object({
   spins: z.union([z.literal(1), z.literal(10), z.literal(100)]),
 });
 
-export type SlotRound = { reels: number[][]; payout: number };
-
-export function countWinningRounds(rounds: Array<{ reels: number[][] }>) {
-  return rounds.filter((round) => round.reels.length === 5 && round.reels.every((reel) => reel[1] === round.reels[0]?.[1])).length;
+export function getWinningLines(reels: number[][]): WinningLine[] {
+  if (reels.length !== 3 || reels.some((reel) => reel.length !== 3)) return [];
+  return SLOT_PAYLINES.flatMap((payline) => {
+    const symbols = payline.positions.map(([reel, row]) => reels[reel]?.[row]);
+    return symbols.every((symbol) => symbol === symbols[0]) ? [{ line: payline.id, symbol: symbols[0] ?? 0 }] : [];
+  });
 }
 
 export function randomServerSeed() {
@@ -50,6 +62,10 @@ async function fairBytes(key: CryptoKey, clientSeed: string, nonce: number, draw
   return new Uint8Array(await crypto.subtle.sign('HMAC', key, message));
 }
 
+function candidateGrid(bytes: Uint8Array) {
+  return Array.from({ length: 3 }, (_, reel) => Array.from({ length: 3 }, (_, row) => (bytes[reel * 3 + row] ?? 0) % SLOT_SYMBOLS));
+}
+
 export async function generateSlotRounds(options: {
   serverSeed: string;
   clientSeed: string;
@@ -65,24 +81,28 @@ export async function generateSlotRounds(options: {
   for (let spin = 0; spin < options.spins; spin += 1) {
     const nonce = options.startNonce + spin;
     const first = await fairBytes(key, options.clientSeed, nonce, 0);
-    const second = await fairBytes(key, options.clientSeed, nonce, 1);
     const won = uniform(first, 0) < WIN_CHANCE;
-    const reels = Array.from({ length: 5 }, () => Array.from({ length: 3 }, () => 0));
-    for (let index = 0; index < 15; index += 1) {
-      const bytes = index < 8 ? first : second;
-      const randomIndex = index < 8 ? index + 1 : index - 8;
-      const reel = Math.floor(index / 3);
-      const row = index % 3;
-      reels[reel]![row] = Math.floor(uniform(bytes, randomIndex) * SLOT_SYMBOLS);
+    const selectedLine = SLOT_PAYLINES[Math.floor(uniform(first, 1) * SLOT_PAYLINES.length)] ?? SLOT_PAYLINES[0];
+    const winSymbol = Math.floor(uniform(first, 2) * SLOT_SYMBOLS);
+    let reels = candidateGrid(first);
+    let winningLines: WinningLine[] = [];
+
+    for (let attempt = 0; attempt < 64; attempt += 1) {
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${options.clientSeed}:${nonce}:${attempt}:${[...first].join(',')}`));
+      const candidate = candidateGrid(new Uint8Array(digest));
+      if (won) {
+        for (const [reel, row] of selectedLine.positions) candidate[reel]![row] = winSymbol;
+      }
+      const lines = getWinningLines(candidate);
+      if ((!won && lines.length === 0) || (won && lines.length === 1 && lines[0]?.line === selectedLine.id)) {
+        reels = candidate;
+        winningLines = lines;
+        break;
+      }
     }
-    const winSymbol = Math.floor(uniform(first, 1) * SLOT_SYMBOLS);
-    if (won) {
-      for (let reel = 0; reel < 5; reel += 1) reels[reel]![1] = winSymbol;
-    } else if (reels.every((reel) => reel[1] === reels[0]![1])) {
-      reels[4]![1] = ((reels[4]![1] ?? 0) + 1) % SLOT_SYMBOLS;
-    }
-    const payout = won ? Math.round(options.bet * winMultiplier * 100) / 100 : 0;
-    rounds.push({ reels, payout });
+
+    const payout = winningLines.length > 0 ? Math.round(options.bet * winMultiplier * winningLines.length * 100) / 100 : 0;
+    rounds.push({ reels, payout, winningLines });
   }
   return rounds;
 }

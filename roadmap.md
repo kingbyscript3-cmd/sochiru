@@ -1,4 +1,5 @@
 # Implementation
+- [x] Rebuild Lost Temple around its carousel artwork with 3×3 reels, central/diagonal server-paid lines, illustrated symbols, gold presentation, sequential reels, win effects, sound controls, and existing bottom controls.
 - [x] Lost Temple full-screen presentation: thematic animated reels, paytable, win animation, persistent balance, bottom bet/spin controls, auto mode until stopped or balance is insufficient, and home navigation.
 - [x] Slot engine: authenticated spin endpoint for 1/10/100 spins, fixed bet ladder, secure RNG, game RTP, provably fair seeds/nonces, atomic ledger/bets SQL transaction, request idempotency, approval/exclusion/balance checks and database-backed per-user rate limiting; client animation only.
 - [x] Cashback mission: eligible deposit creates five US$ 20 daily installments, scheduled server release, configurable terms, wallet alert and progress sheet.
