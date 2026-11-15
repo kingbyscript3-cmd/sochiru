@@ -1,5 +1,5 @@
 # Implementation
-- [ ] Add a test balance to rei.investe@gmail.com; waiting for the requested amount.
+- [ ] Add an audited US$ 200 test adjustment to rei.investe@gmail.com and verify it in the player wallet.
 - [x] Rebuild Lost Temple around its carousel artwork with 3×3 reels, central/diagonal server-paid lines, illustrated symbols, gold presentation, sequential reels, win effects, sound controls, and existing bottom controls.
 - [x] Lost Temple full-screen presentation: thematic animated reels, paytable, win animation, persistent balance, bottom bet/spin controls, auto mode until stopped or balance is insufficient, and home navigation.
 - [x] Slot engine: authenticated spin endpoint for 1/10/100 spins, fixed bet ladder, secure RNG, game RTP, provably fair seeds/nonces, atomic ledger/bets SQL transaction, request idempotency, approval/exclusion/balance checks and database-backed per-user rate limiting; client animation only.
