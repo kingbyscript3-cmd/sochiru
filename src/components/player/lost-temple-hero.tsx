@@ -83,7 +83,7 @@ export function LostTempleHero() {
         <div className="temple-machine-stage">
           <motion.div
             className="temple-machine-float"
-            animate={reduceMotion ? undefined : { y: [0, -6, 0] }}
+            animate={reduceMotion ? { y: 0 } : { y: [0, -6, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           >
             <img className="temple-machine-aura" src={machineArt} alt="" aria-hidden="true" />
