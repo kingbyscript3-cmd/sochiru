@@ -39,3 +39,4 @@ use the editor.
 - Player shell and slots are isolated from KYC screens; game entry validates approval and self-exclusion server-side. Why: existing status routing stays intact.
 - Responsible-play changes use authenticated server functions and service-only audited SQL functions; append-only limits/exclusions and a ledger trigger enforce restrictions. Why: browser requests cannot bypass financial safety rules.
 - Cashback missions, installment releases and achievement unlocks are created by audited database functions and server triggers; the daily managed cron route only invokes the release function. Why: clients cannot grant bonuses or badges.
+- Slot outcomes use authenticated server functions plus an atomic service-only SQL batch function; fair-session secrets and idempotent responses are server-only, and clients receive only reels and balance. Why: browser code cannot control outcomes or charge twice.

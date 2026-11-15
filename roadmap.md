@@ -1,8 +1,9 @@
 # Implementation
-- [ ] Cashback mission: eligible deposit creates five US$ 20 daily installments, scheduled server release, configurable terms, wallet alert and progress sheet.
-- [ ] Referral bot link with US$ 150 message and one-account enforcement per Telegram ID/document.
-- [ ] Server-granted locked/unlocked achievement badges at the end of the wallet.
-- [ ] Verify mission, referral and achievement rules with automated tests and a signed-in wallet flow.
+- [ ] Slot engine: authenticated spin endpoint for 1/10/100 spins, fixed bet ladder, secure RNG, game RTP, provably fair seeds/nonces, atomic ledger/bets SQL transaction, request idempotency, approval/exclusion/balance checks and per-user rate limiting; client animation only.
+- [x] Cashback mission: eligible deposit creates five US$ 20 daily installments, scheduled server release, configurable terms, wallet alert and progress sheet.
+- [x] Referral bot link with US$ 150 message and one-account enforcement per Telegram ID/document.
+- [x] Server-granted locked/unlocked achievement badges at the end of the wallet.
+- [x] Verify mission, referral and achievement rules with automated tests and a signed-in wallet flow.
 - [ ] Wallet/profile: trading-style overview, referral sharing, USDC deposit details, ledger history, achievements and server-reserved Solana withdrawals; verify signed-in flow.
 - [ ] Player home: circular 3D slots, approved-only navigation, EN/RU settings, server-saved limits and self-exclusion; verify signed-in flow.
 - [x] Restore signup profile creation, repair the missing account profile, and verify signed-in dashboard loading.

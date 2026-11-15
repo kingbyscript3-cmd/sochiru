@@ -579,6 +579,92 @@ export type Database = {
           },
         ]
       }
+      slot_sessions: {
+        Row: {
+          client_seed: string
+          created_at: string
+          game: string
+          id: string
+          nonce: number
+          revealed_at: string | null
+          server_seed: string
+          server_seed_hash: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          client_seed: string
+          created_at?: string
+          game: string
+          id?: string
+          nonce?: number
+          revealed_at?: string | null
+          server_seed: string
+          server_seed_hash: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          client_seed?: string
+          created_at?: string
+          game?: string
+          id?: string
+          nonce?: number
+          revealed_at?: string | null
+          server_seed?: string
+          server_seed_hash?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slot_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      spin_requests: {
+        Row: {
+          created_at: string
+          request_id: string
+          response: Json
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          request_id: string
+          response: Json
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          request_id?: string
+          response?: Json
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spin_requests_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "slot_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spin_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -798,6 +884,17 @@ export type Database = {
       is_self_excluded: { Args: { _user_id: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_staff_mfa: { Args: { _user_id: string }; Returns: boolean }
+      play_slot_spins: {
+        Args: {
+          _bet: number
+          _request_id: string
+          _response: Json
+          _results: Json
+          _session_id: string
+          _spins: number
+        }
+        Returns: Json
+      }
       player_save_limits: {
         Args: {
           _daily: number

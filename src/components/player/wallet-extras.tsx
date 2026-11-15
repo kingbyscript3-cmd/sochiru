@@ -6,7 +6,7 @@ import { requestReferralLink } from '@/lib/wallet.functions';
 import { CASHBACK_INSTALLMENT_AMOUNT, CASHBACK_INSTALLMENTS, CASHBACK_TOTAL, cashbackReleased, countdownLabel, currentCashbackSequence, type CashbackInstallment } from '@/lib/cashback-rules';
 import { useI18n, type Lang } from '@/i18n';
 import { Button } from '@/components/ui/button';
-import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 type Mission = {
   status: string;
@@ -52,13 +52,13 @@ export function CashbackMission({ mission, terms }: { mission: Mission; terms: M
       <span className="min-w-0 flex-1"><span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-success">{t.cashbackMission}</span><span className="mt-1 block text-sm font-semibold">{t.cashbackAlertTitle}</span><span className="mt-1 block text-xs text-muted-foreground">{t.cashbackAlertText}</span></span>
       <ArrowRight className="size-4 shrink-0 text-success" />
     </button>
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerContent className="max-h-[92vh] overflow-y-auto border-border bg-background px-2 sm:mx-auto sm:max-w-lg">
-        <DrawerHeader className="px-3 pt-5 text-left">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="top-auto bottom-0 max-h-[92vh] translate-y-0 gap-0 overflow-y-auto rounded-t-2xl border-border bg-background px-2 pb-0 sm:max-w-lg">
+        <DialogHeader className="px-3 pt-5 text-left">
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-success">{t.cashbackMission}</p>
-          <DrawerTitle className="mt-2 text-xl leading-7">US$ {money(released, lang)} / US$ {CASHBACK_TOTAL} {t.cashbackReleased}</DrawerTitle>
-          <DrawerDescription className="mt-2 leading-6">{complete ? t.cashbackComplete : mission ? t.cashbackSupportActive : t.cashbackSupportNoMission}</DrawerDescription>
-        </DrawerHeader>
+          <DialogTitle className="mt-2 text-xl leading-7">US$ {money(released, lang)} / US$ {CASHBACK_TOTAL} {t.cashbackReleased}</DialogTitle>
+          <DialogDescription className="mt-2 leading-6">{complete ? t.cashbackComplete : mission ? t.cashbackSupportActive : t.cashbackSupportNoMission}</DialogDescription>
+        </DialogHeader>
         <div className="grid grid-cols-5 gap-1.5 px-3 py-3">
           {cards.map((item, index) => {
             const paid = item?.status === 'paid';
@@ -81,9 +81,9 @@ export function CashbackMission({ mission, terms }: { mission: Mission; terms: M
             <div><p className="text-xs text-muted-foreground">{t.withdrawalRules}</p><p className="mt-1 whitespace-pre-wrap">{terms.withdrawalRules}</p></div>
           </section>}
         </div>
-        <DrawerFooter className="px-3 pb-8 pt-5"><Button asChild className="h-12 w-full bg-success text-success-foreground hover:bg-success/90"><Link to="/dashboard" onClick={() => setOpen(false)}>{t.playNow}<ArrowRight /></Link></Button></DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        <DialogFooter className="px-3 pb-8 pt-5"><Button asChild className="h-12 w-full bg-success text-success-foreground hover:bg-success/90"><Link to="/dashboard" onClick={() => setOpen(false)}>{t.playNow}<ArrowRight /></Link></Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
   </>;
 }
 
