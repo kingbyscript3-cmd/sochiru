@@ -110,7 +110,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // Telegram's Web App script sets viewport CSS variables on <html> before hydration.
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
