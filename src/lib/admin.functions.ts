@@ -254,7 +254,10 @@ export const saveMissionTerms = createServerFn({ method: 'POST' }).middleware([r
   .inputValidator((input) => missionTermsSchema.parse(input))
   .handler(async ({ data, context }) => {
     await requireRoles(context.supabase, context.userId, context.claims.aal, ADMIN);
-    const { error } = await context.supabase.rpc('admin_save_mission_terms', { _version: data.version, _terms: data.terms });
+    const { error } = await context.supabase.rpc('admin_save_cashback_terms', {
+      _version: data.version, _rollover: data.rollover, _expires_days: data.expiresDays,
+      _terms: data.terms, _withdrawal_rules: data.withdrawalRules,
+    });
     if (error) throwDb(error);
     return { ok: true };
   });

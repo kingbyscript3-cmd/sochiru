@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794742177864,
+      "tag": "0000_cashback_missions_referrals_achievements",
+      "breakpoints": true
+    }
+  ]
 }

@@ -1,4 +1,8 @@
 # Implementation
+- [ ] Cashback mission: eligible deposit creates five US$ 20 daily installments, scheduled server release, configurable terms, wallet alert and progress sheet.
+- [ ] Referral bot link with US$ 150 message and one-account enforcement per Telegram ID/document.
+- [ ] Server-granted locked/unlocked achievement badges at the end of the wallet.
+- [ ] Verify mission, referral and achievement rules with automated tests and a signed-in wallet flow.
 - [ ] Wallet/profile: trading-style overview, referral sharing, USDC deposit details, ledger history, achievements and server-reserved Solana withdrawals; verify signed-in flow.
 - [ ] Player home: circular 3D slots, approved-only navigation, EN/RU settings, server-saved limits and self-exclusion; verify signed-in flow.
 - [x] Restore signup profile creation, repair the missing account profile, and verify signed-in dashboard loading.

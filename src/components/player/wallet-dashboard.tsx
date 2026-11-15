@@ -4,11 +4,11 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import {
   ArrowDownToLine, ArrowUpFromLine, Check, CircleDollarSign, Clock3, Copy,
-  History, LoaderCircle, Settings, Share2, Trophy, TriangleAlert, UserPlus,
+  History, LoaderCircle, Settings, Share2, TriangleAlert, UserPlus,
 } from 'lucide-react';
-import { accountQuery } from '@/lib/account-query';
 import { walletQuery } from '@/lib/wallet-query';
-import { requestWithdrawal } from '@/lib/wallet.functions';
+import { requestReferralLink, requestWithdrawal } from '@/lib/wallet.functions';
+import { AchievementBadges, CashbackMission, ReferralCard } from './wallet-extras';
 import { withdrawalSchema, type WalletPanel } from '@/lib/wallet-rules';
 import { useI18n, type Lang } from '@/i18n';
 import { Button } from '@/components/ui/button';
@@ -65,6 +65,7 @@ export function WalletDashboard({ panel }: { panel: WalletPanel }) {
   const navigate = useNavigate();
   const client = useQueryClient();
   const request = useServerFn(requestWithdrawal);
+  const getReferralLink = useServerFn(requestReferralLink);
   const [notice, setNotice] = useState('');
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [destination, setDestination] = useState('');
@@ -84,29 +85,26 @@ export function WalletDashboard({ panel }: { panel: WalletPanel }) {
     await navigate({ to: '/wallet', search: next === 'history' ? {} : { tab: next } });
   }
 
-  function referralUrl() {
-    const url = new URL('/register', window.location.origin);
-    url.searchParams.set('ref', data.profile.referral_code);
-    return url.toString();
-  }
-
-  async function invite() {
-    const copied = await copyText(referralUrl());
-    setNotice(copied ? t.referralCopied : t.genericError);
+  function invite() {
+    document.getElementById('referral')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   async function share() {
-    const url = referralUrl();
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: t.appName, text: t.shareText, url });
-        return;
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') return;
+    try {
+      const { url } = await getReferralLink({});
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: t.appName, text: t.referralReward, url });
+          return;
+        } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') return;
+        }
       }
+      const copied = await copyText(url);
+      setNotice(copied ? t.referralCopied : t.genericError);
+    } catch {
+      setNotice(t.referralError);
     }
-    const copied = await copyText(url);
-    setNotice(copied ? t.referralCopied : t.genericError);
   }
 
   async function copyDepositAddress() {
@@ -144,11 +142,10 @@ export function WalletDashboard({ panel }: { panel: WalletPanel }) {
     }
   }
 
-  const tabs: { key: 'history' | 'deposits' | 'withdrawals' | 'achievements'; label: string }[] = [
+  const tabs: { key: 'history' | 'deposits' | 'withdrawals'; label: string }[] = [
     { key: 'history', label: t.history },
     { key: 'deposits', label: t.deposits },
     { key: 'withdrawals', label: t.withdrawals },
-    { key: 'achievements', label: t.achievements },
   ];
 
   return <div className="px-5 pb-8 pt-5 sm:px-8">
@@ -178,6 +175,8 @@ export function WalletDashboard({ panel }: { panel: WalletPanel }) {
       <Button variant="outline" className="h-12" onClick={() => void openPanel('withdraw')}><ArrowUpFromLine />{t.withdraw}</Button>
     </div>
 
+    <CashbackMission mission={data.mission} terms={data.missionTerms} />
+
     <nav className="mt-7 flex overflow-x-auto border-b border-border" aria-label={t.walletProfile}>
       {tabs.map((tab) => <button key={tab.key} type="button" onClick={() => void openPanel(tab.key)} aria-current={activeTab === tab.key ? 'page' : undefined} className={`min-w-max flex-1 border-b-2 px-3 pb-3 text-xs font-medium transition-colors sm:text-sm ${activeTab === tab.key ? 'border-success text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>{tab.label}</button>)}
     </nav>
@@ -196,6 +195,7 @@ export function WalletDashboard({ panel }: { panel: WalletPanel }) {
       <section><h2 className="mb-4 text-sm font-semibold">{t.withdrawals}</h2>{!data.withdrawals.length ? <EmptyState title={t.noWithdrawals} description={t.noWithdrawalsText} /> : <div>{data.withdrawals.map((item) => <article key={item.id} className="border-b border-border py-4 last:border-0"><div className="flex items-start justify-between gap-3"><div><p className="font-semibold tabular-nums">{money(Number(item.amount), lang)} USDC</p><p className="mt-1 text-xs text-muted-foreground">{dateTime(item.created_at, lang)}</p></div><span className={`border px-2 py-1 text-[10px] font-medium uppercase tracking-wider ${item.status === 'paid' ? 'border-success/30 bg-success/10 text-success' : item.status === 'rejected' ? 'border-destructive/30 text-destructive' : 'border-border text-muted-foreground'}`}>{t.withdrawalStatus[item.status]}</span></div><p className="mt-3 font-mono text-xs text-muted-foreground" title={item.destination_address}>{shortAddress(item.destination_address)}</p>{item.rejection_reason && <p className="mt-2 text-xs text-destructive">{item.rejection_reason}</p>}{item.tx_hash && <p className="mt-2 truncate font-mono text-[10px] text-muted-foreground" title={item.tx_hash}>{item.tx_hash}</p>}</article>)}</div>}</section>
     </div></Panel>}
 
-    {panel === 'achievements' && <Panel>{!data.achievements.length ? <EmptyState title={t.noAchievements} description={t.noAchievementsText} /> : <div className="grid gap-3 sm:grid-cols-2">{data.achievements.map((item) => <article key={item.id} className="border border-border bg-card p-5"><Trophy className="size-5 text-success" /><h2 className="mt-4 font-semibold">{lang === 'ru' ? item.titleRu : item.titleEn}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">{lang === 'ru' ? item.descriptionRu : item.descriptionEn}</p><div className="mt-4 flex items-center justify-between gap-3 text-xs"><span className="text-muted-foreground">{t.unlocked} · {dateTime(item.unlockedAt, lang)}</span>{item.rewardAmount > 0 && <span className="font-semibold text-success">+{money(item.rewardAmount, lang)}</span>}</div></article>)}</div>}</Panel>}
+    <ReferralCard />
+    <AchievementBadges achievements={data.achievements} />
   </div>;
 }

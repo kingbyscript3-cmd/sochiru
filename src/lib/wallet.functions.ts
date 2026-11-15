@@ -7,41 +7,96 @@ function throwDb(error: { message: string } | null): never {
 }
 
 export const getWallet = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
-  const [profile, balance, ledger, withdrawals, achievements, excluded] = await Promise.all([
+  const [profile, balance, ledger, withdrawals, unlocked, catalog, excluded, mission, settings, referrals] = await Promise.all([
     context.supabase.from('profiles').select('full_name,email,referral_code,solana_wallet_address').eq('user_id', context.userId).maybeSingle(),
     context.supabase.rpc('get_balance', { _user_id: context.userId }),
     context.supabase.from('ledger').select('id,type,amount,reason,tx_hash,created_at').eq('user_id', context.userId).order('created_at', { ascending: false }).limit(100),
     context.supabase.from('withdrawals').select('id,amount,destination_address,status,tx_hash,rejection_reason,created_at,updated_at').eq('user_id', context.userId).order('created_at', { ascending: false }).limit(100),
-    context.supabase.from('user_achievements').select('id,unlocked_at,achievement:achievements(title_en,title_ru,description_en,description_ru,reward_amount)').eq('user_id', context.userId).order('unlocked_at', { ascending: false }),
+    context.supabase.from('user_achievements').select('achievement_id,unlocked_at').eq('user_id', context.userId),
+    context.supabase.from('achievements').select('id,code,title_en,title_ru,description_en,description_ru,reward_amount,icon').eq('active', true).order('created_at'),
     context.supabase.rpc('is_self_excluded', { _user_id: context.userId }),
+    context.supabase.from('missions').select('id,total_amount,status,terms_version,created_at,deposit_amount,rollover,expires_at,installments:mission_installments(sequence,amount,due_at,status,paid_at)').eq('user_id', context.userId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    context.supabase.from('app_settings').select('value').eq('key', 'mission_terms').maybeSingle(),
+    context.supabase.from('referrals').select('id', { count: 'exact', head: true }).eq('referrer_id', context.userId),
   ]);
   if (profile.error) throwDb(profile.error);
   if (!profile.data) throw new Error('PROFILE_NOT_FOUND');
   if (balance.error) throwDb(balance.error);
   if (ledger.error) throwDb(ledger.error);
   if (withdrawals.error) throwDb(withdrawals.error);
-  if (achievements.error) throwDb(achievements.error);
+  if (unlocked.error) throwDb(unlocked.error);
+  if (catalog.error) throwDb(catalog.error);
   if (excluded.error) throwDb(excluded.error);
+  if (mission.error) throwDb(mission.error);
+  if (settings.error) throwDb(settings.error);
+  if (referrals.error) throwDb(referrals.error);
+
+  const unlockedById = new Map((unlocked.data ?? []).map((item) => [item.achievement_id, item.unlocked_at]));
+  const rawTerms = settings.data?.value && typeof settings.data.value === 'object' && !Array.isArray(settings.data.value)
+    ? settings.data.value as Record<string, unknown>
+    : {};
+  const installments = (mission.data?.installments ?? []).map((item) => ({
+    sequence: item.sequence,
+    amount: Number(item.amount),
+    dueAt: item.due_at,
+    status: item.status,
+    paidAt: item.paid_at,
+  })).sort((a, b) => a.sequence - b.sequence);
 
   return {
     profile: profile.data,
     balance: Number(balance.data ?? 0),
     ledger: ledger.data ?? [],
     withdrawals: withdrawals.data ?? [],
-    achievements: (achievements.data ?? []).map((item) => {
-      const achievement = Array.isArray(item.achievement) ? item.achievement[0] : item.achievement;
-      return {
-        id: item.id,
-        unlockedAt: item.unlocked_at,
-        titleEn: achievement?.title_en ?? '',
-        titleRu: achievement?.title_ru ?? '',
-        descriptionEn: achievement?.description_en ?? '',
-        descriptionRu: achievement?.description_ru ?? '',
-        rewardAmount: Number(achievement?.reward_amount ?? 0),
-      };
-    }),
+    achievements: (catalog.data ?? []).map((item) => ({
+      id: item.id,
+      code: item.code,
+      unlockedAt: unlockedById.get(item.id) ?? null,
+      titleEn: item.title_en,
+      titleRu: item.title_ru,
+      descriptionEn: item.description_en ?? '',
+      descriptionRu: item.description_ru ?? '',
+      rewardAmount: Number(item.reward_amount),
+      icon: item.icon ?? 'trophy',
+    })),
     excluded: Boolean(excluded.data),
+    mission: mission.data ? {
+      id: mission.data.id,
+      totalAmount: Number(mission.data.total_amount),
+      status: mission.data.status,
+      termsVersion: mission.data.terms_version,
+      depositAmount: Number(mission.data.deposit_amount ?? 0),
+      rollover: Number(mission.data.rollover),
+      expiresAt: mission.data.expires_at,
+      installments,
+    } : null,
+    missionTerms: {
+      version: typeof rawTerms['version'] === 'number' ? rawTerms['version'] : 1,
+      rollover: typeof rawTerms['rollover'] === 'number' ? rawTerms['rollover'] : 1,
+      expiresDays: typeof rawTerms['expiresDays'] === 'number' ? rawTerms['expiresDays'] : 30,
+      terms: typeof rawTerms['terms'] === 'string' ? rawTerms['terms'] : '',
+      withdrawalRules: typeof rawTerms['withdrawalRules'] === 'string' ? rawTerms['withdrawalRules'] : '',
+    },
+    referralCount: referrals.count ?? 0,
   };
+});
+
+export const requestReferralLink = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
+  const { data: profile, error } = await context.supabase.from('profiles').select('referral_code').eq('user_id', context.userId).maybeSingle();
+  if (error) throwDb(error);
+  if (!profile) throw new Error('PROFILE_NOT_FOUND');
+  const token = process.env['TELEGRAM_BOT_TOKEN'];
+  if (!token) throw new Error('TELEGRAM_BOT_UNAVAILABLE');
+  const response = await fetch(`https://api.telegram.org/bot${token}/getMe`, { signal: AbortSignal.timeout(10_000) });
+  const result: unknown = await response.json();
+  const username = result && typeof result === 'object' && 'result' in result
+    && result.result && typeof result.result === 'object' && 'username' in result.result
+    ? result.result.username
+    : null;
+  if (!response.ok || typeof username !== 'string' || !/^[a-zA-Z0-9_]{5,64}$/.test(username)) {
+    throw new Error('TELEGRAM_BOT_UNAVAILABLE');
+  }
+  return { url: `https://t.me/${username}?start=${profile.referral_code}`, code: profile.referral_code };
 });
 
 export const requestWithdrawal = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])

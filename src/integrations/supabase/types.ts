@@ -368,8 +368,12 @@ export type Database = {
       missions: {
         Row: {
           created_at: string
+          deposit_amount: number | null
+          expires_at: string | null
           id: string
           installments_count: number
+          rollover: number
+          source_ledger_id: number | null
           status: string
           terms_version: number
           total_amount: number
@@ -378,8 +382,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deposit_amount?: number | null
+          expires_at?: string | null
           id?: string
           installments_count: number
+          rollover?: number
+          source_ledger_id?: number | null
           status?: string
           terms_version?: number
           total_amount: number
@@ -388,8 +396,12 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deposit_amount?: number | null
+          expires_at?: string | null
           id?: string
           installments_count?: number
+          rollover?: number
+          source_ledger_id?: number | null
           status?: string
           terms_version?: number
           total_amount?: number
@@ -397,6 +409,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "missions_source_ledger_id_fkey"
+            columns: ["source_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "ledger"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "missions_user_id_fkey"
             columns: ["user_id"]
@@ -734,6 +753,16 @@ export type Database = {
         }
         Returns: string
       }
+      admin_save_cashback_terms: {
+        Args: {
+          _expires_days: number
+          _rollover: number
+          _terms: string
+          _version: number
+          _withdrawal_rules: string
+        }
+        Returns: undefined
+      }
       admin_save_game_settings: {
         Args: {
           _enabled: boolean
@@ -756,6 +785,7 @@ export type Database = {
         Args: { _roles: Database["public"]["Enums"]["app_role"][] }
         Returns: undefined
       }
+      evaluate_achievements: { Args: { _user_id: string }; Returns: number }
       generate_referral_code: { Args: never; Returns: string }
       get_balance: { Args: { _user_id?: string }; Returns: number }
       has_role: {
@@ -793,6 +823,7 @@ export type Database = {
         }
         Returns: number
       }
+      release_cashback_installments: { Args: never; Returns: number }
       request_withdrawal: {
         Args: { _amount: number; _destination_address: string }
         Returns: string

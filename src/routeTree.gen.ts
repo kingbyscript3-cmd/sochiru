@@ -30,6 +30,7 @@ import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminWithdrawalsRouteImport } from './routes/_authenticated/admin.withdrawals'
 import { Route as AuthenticatedGameGameIdRouteImport } from './routes/_authenticated/game.$gameId'
 import { Route as AuthenticatedAdminPlayersPlayerIdRouteImport } from './routes/_authenticated/admin.players.$playerId'
+import { Route as ApiPublicJobsReleaseCashbackRouteImport } from './routes/api/public/jobs/release-cashback'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -140,6 +141,12 @@ const AuthenticatedAdminPlayersPlayerIdRoute =
     path: '/$playerId',
     getParentRoute: () => AuthenticatedAdminPlayersRoute,
   } as any)
+const ApiPublicJobsReleaseCashbackRoute =
+  ApiPublicJobsReleaseCashbackRouteImport.update({
+    id: '/api/public/jobs/release-cashback',
+    path: '/api/public/jobs/release-cashback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/game/$gameId': typeof AuthenticatedGameGameIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/players/$playerId': typeof AuthenticatedAdminPlayersPlayerIdRoute
+  '/api/public/jobs/release-cashback': typeof ApiPublicJobsReleaseCashbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -183,6 +191,7 @@ export interface FileRoutesByTo {
   '/game/$gameId': typeof AuthenticatedGameGameIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/players/$playerId': typeof AuthenticatedAdminPlayersPlayerIdRoute
+  '/api/public/jobs/release-cashback': typeof ApiPublicJobsReleaseCashbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -207,6 +216,7 @@ export interface FileRoutesById {
   '/_authenticated/game/$gameId': typeof AuthenticatedGameGameIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/players/$playerId': typeof AuthenticatedAdminPlayersPlayerIdRoute
+  '/api/public/jobs/release-cashback': typeof ApiPublicJobsReleaseCashbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/game/$gameId'
     | '/admin/'
     | '/admin/players/$playerId'
+    | '/api/public/jobs/release-cashback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/game/$gameId'
     | '/admin'
     | '/admin/players/$playerId'
+    | '/api/public/jobs/release-cashback'
   id:
     | '__root__'
     | '/'
@@ -275,6 +287,7 @@ export interface FileRouteTypes {
     | '/_authenticated/game/$gameId'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/players/$playerId'
+    | '/api/public/jobs/release-cashback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -285,6 +298,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
+  ApiPublicJobsReleaseCashbackRoute: typeof ApiPublicJobsReleaseCashbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -436,6 +450,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPlayersPlayerIdRouteImport
       parentRoute: typeof AuthenticatedAdminPlayersRoute
     }
+    '/api/public/jobs/release-cashback': {
+      id: '/api/public/jobs/release-cashback'
+      path: '/api/public/jobs/release-cashback'
+      fullPath: '/api/public/jobs/release-cashback'
+      preLoaderRoute: typeof ApiPublicJobsReleaseCashbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -506,6 +527,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
+  ApiPublicJobsReleaseCashbackRoute: ApiPublicJobsReleaseCashbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

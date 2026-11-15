@@ -38,3 +38,4 @@ use the editor.
 - Account profiles are created by the auth signup trigger; optional profile reads use maybeSingle and explicitly reject missing profiles. Why: remixed accounts must not crash with a single-row coercion error or bypass verification.
 - Player shell and slots are isolated from KYC screens; game entry validates approval and self-exclusion server-side. Why: existing status routing stays intact.
 - Responsible-play changes use authenticated server functions and service-only audited SQL functions; append-only limits/exclusions and a ledger trigger enforce restrictions. Why: browser requests cannot bypass financial safety rules.
+- Cashback missions, installment releases and achievement unlocks are created by audited database functions and server triggers; the daily managed cron route only invokes the release function. Why: clients cannot grant bonuses or badges.

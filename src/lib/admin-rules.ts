@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { cashbackTermsSchema } from './cashback-rules';
 
 export const STAFF_ROLES = ['admin', 'finance', 'support'] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
@@ -59,7 +60,7 @@ export const gameSettingsSchema = z.object({
   maxBet: z.number().finite().positive().max(1_000_000_000),
   enabled: z.boolean(),
 }).refine((value) => value.maxBet >= value.minBet, { message: 'INVALID_GAME_SETTINGS' });
-export const missionTermsSchema = z.object({ version: z.number().int().min(1).max(1000000), terms: z.string().trim().min(10).max(20000) });
+export const missionTermsSchema = cashbackTermsSchema;
 export const achievementSchema = z.object({
   id: uuid.nullable(),
   code: z.string().trim().regex(/^[a-z0-9_-]{2,50}$/),
