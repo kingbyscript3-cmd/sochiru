@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateSlotRounds, randomServerSeed, sha256Hex, spinSchema } from '@/lib/slot-engine';
+import { countWinningRounds, generateSlotRounds, randomServerSeed, sha256Hex, SPIN_RATE_LIMIT, SPIN_RATE_WINDOW_SECONDS, spinSchema } from '@/lib/slot-engine';
 
 describe('slot engine rules', () => {
   it('accepts only the requested bets and 1, 10 or 100 spins', () => {
@@ -8,6 +8,17 @@ describe('slot engine rules', () => {
     expect(spinSchema.safeParse({ ...base, bet: 100, spins: 100 }).success).toBe(true);
     expect(spinSchema.safeParse({ ...base, bet: 0.3, spins: 1 }).success).toBe(false);
     expect(spinSchema.safeParse({ ...base, bet: 1, spins: 5 }).success).toBe(false);
+  });
+
+  it('detects wins only when all five central symbols match', () => {
+    const win = Array.from({ length: 5 }, () => [0, 2, 1]);
+    const loss = [[0, 2, 1], [0, 2, 1], [0, 2, 1], [0, 2, 1], [0, 3, 1]];
+    expect(countWinningRounds([{ reels: win }, { reels: loss }])).toBe(1);
+  });
+
+  it('uses the confirmed five-request ten-second user window', () => {
+    expect(SPIN_RATE_LIMIT).toBe(5);
+    expect(SPIN_RATE_WINDOW_SECONDS).toBe(10);
   });
 
   it('generates a cryptographically random 32-byte seed and publishes its SHA-256 hash', async () => {

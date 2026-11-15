@@ -27,7 +27,7 @@ async function checkSlotAccess(supabase: SupabaseClient<Database>, userId: strin
 export const prepareSpin = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((input) => prepareSpinSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await checkSlotAccess(context.supabase, context.userId, data.game);
+    const settings = await checkSlotAccess(context.supabase, context.userId, data.game);
     const serverSeed = randomServerSeed();
     const serverSeedHash = await sha256Hex(serverSeed);
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
@@ -39,7 +39,7 @@ export const prepareSpin = createServerFn({ method: 'POST' }).middleware([requir
       client_seed: data.clientSeed,
     }).select('id,nonce,created_at').single();
     if (error) throwDb(error);
-    return { sessionId: session.id, game: data.game, serverSeedHash, clientSeed: data.clientSeed, nonce: Number(session.nonce) };
+    return { sessionId: session.id, game: data.game, serverSeedHash, clientSeed: data.clientSeed, nonce: Number(session.nonce), rtp: Number(settings.rtp) };
   });
 
 type SpinResponse = { rounds: Array<{ reels: number[][] }>; balance: number };

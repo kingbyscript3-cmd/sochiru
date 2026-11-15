@@ -3,6 +3,8 @@ import { z } from 'zod';
 export const SLOT_BET_VALUES = [0.20, 0.50, 1, 2, 5, 10, 15, 20, 25, 50, 100] as const;
 export const SLOT_SPIN_COUNTS = [1, 10, 100] as const;
 export const SLOT_SYMBOLS = 7;
+export const SPIN_RATE_LIMIT = 5;
+export const SPIN_RATE_WINDOW_SECONDS = 10;
 const WIN_CHANCE = 0.25;
 
 export const clientSeedSchema = z.string().trim().min(1).max(64).regex(/^[a-zA-Z0-9_-]+$/);
@@ -19,6 +21,10 @@ export const spinSchema = z.object({
 });
 
 export type SlotRound = { reels: number[][]; payout: number };
+
+export function countWinningRounds(rounds: Array<{ reels: number[][] }>) {
+  return rounds.filter((round) => round.reels.length === 5 && round.reels.every((reel) => reel[1] === round.reels[0]?.[1])).length;
+}
 
 export function randomServerSeed() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));

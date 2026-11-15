@@ -1,5 +1,6 @@
 # Implementation
-- [ ] Slot engine: authenticated spin endpoint for 1/10/100 spins, fixed bet ladder, secure RNG, game RTP, provably fair seeds/nonces, atomic ledger/bets SQL transaction, request idempotency, approval/exclusion/balance checks and per-user rate limiting; client animation only.
+- [x] Lost Temple full-screen presentation: thematic animated reels, paytable, win animation, persistent balance, bottom bet/spin controls, auto mode until stopped or balance is insufficient, and home navigation.
+- [x] Slot engine: authenticated spin endpoint for 1/10/100 spins, fixed bet ladder, secure RNG, game RTP, provably fair seeds/nonces, atomic ledger/bets SQL transaction, request idempotency, approval/exclusion/balance checks and database-backed per-user rate limiting; client animation only.
 - [x] Cashback mission: eligible deposit creates five US$ 20 daily installments, scheduled server release, configurable terms, wallet alert and progress sheet.
 - [x] Referral bot link with US$ 150 message and one-account enforcement per Telegram ID/document.
 - [x] Server-granted locked/unlocked achievement badges at the end of the wallet.
