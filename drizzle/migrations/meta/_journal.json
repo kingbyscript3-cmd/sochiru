@@ -29,6 +29,13 @@
       "when": 1794742923995,
       "tag": "0003_spin_user_rate_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794744036260,
+      "tag": "0004_fix_spin_result_recording",
+      "breakpoints": true
     }
   ]
 }
