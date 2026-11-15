@@ -1,0 +1,17 @@
+# Implementation
+- [ ] Wallet/profile: trading-style overview, referral sharing, USDC deposit details, ledger history, achievements and server-reserved Solana withdrawals; verify signed-in flow.
+- [ ] Player home: circular 3D slots, approved-only navigation, EN/RU settings, server-saved limits and self-exclusion; verify signed-in flow.
+- [x] Restore signup profile creation, repair the missing account profile, and verify signed-in dashboard loading.
+- [x] Account screens: sign-in, registration with optional referral, password recovery.
+- [x] Private KYC submission and status-based account screens.
+- [x] Black theme, English/Russian text and Settings language switch.
+- [x] Server-verified, unique Telegram account linking.
+- [x] Automated tests and public browser checks.
+- [ ] Admin database rules: AAL2 staff access, KYC review, audited ledger and withdrawal transitions, settings and reports.
+- [ ] Admin /admin shell with role navigation and TOTP enrollment/challenge.
+- [ ] KYC queue with temporary signed document URLs and wallet-on-approval.
+- [ ] Player directory and player page with bets, finances, achievements and referrals.
+- [ ] Withdrawal, user, settings, reports and audit screens.
+- [ ] Verify admin rules with automated tests and a signed-in admin browser flow.
+- [ ] Authenticated KYC/status end-to-end checks: blocked by absence of a registered, confirmed user.
+- [ ] Real email confirmation/recovery and Telegram mini-app linking: require real email and signed initData.
