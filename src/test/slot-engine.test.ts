@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateSlotRounds, getWinningLines, randomServerSeed, sha256Hex, SPIN_RATE_LIMIT, SPIN_RATE_WINDOW_SECONDS, spinSchema } from '@/lib/slot-engine';
+import { generateSlotRounds, getWinningLines, randomServerSeed, sha256Hex, SLOT_WIN_CHANCE, SPIN_RATE_LIMIT, SPIN_RATE_WINDOW_SECONDS, spinSchema } from '@/lib/slot-engine';
 
 describe('slot engine rules', () => {
   it('accepts only the requested bets and 1, 10 or 100 spins', () => {
@@ -17,6 +17,11 @@ describe('slot engine rules', () => {
     expect(getWinningLines(middle)).toEqual([{ line: 'middle', symbol: 2 }]);
     expect(getWinningLines(down)).toEqual([{ line: 'diagonalDown', symbol: 2 }]);
     expect(getWinningLines(up)).toEqual([{ line: 'diagonalUp', symbol: 2 }]);
+  });
+
+  it('reduces the original 25% winning frequency by exactly 15%', () => {
+    expect(SLOT_WIN_CHANCE).toBe(0.25 * 0.85);
+    expect(SLOT_WIN_CHANCE).toBe(0.2125);
   });
 
   it('uses the confirmed five-request ten-second user window', () => {
@@ -40,6 +45,6 @@ describe('slot engine rules', () => {
     expect(first).toHaveLength(10);
     expect(first.every((round) => round.reels.length === 3 && round.reels.every((reel) => reel.length === 3))).toBe(true);
     expect(first.every((round) => JSON.stringify(round.winningLines) === JSON.stringify(getWinningLines(round.reels)))).toBe(true);
-    expect(first.every((round) => round.payout === 0 || round.payout === 3.84)).toBe(true);
+    expect(first.every((round) => round.payout === 0 || round.payout === 4.52)).toBe(true);
   });
 });

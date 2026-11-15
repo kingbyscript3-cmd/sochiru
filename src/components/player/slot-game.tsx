@@ -7,7 +7,7 @@ import { ArrowLeft, LoaderCircle, Repeat2, ShieldCheck, Square, Volume2, VolumeX
 import templeArt from '@/assets/lost-temple.jpg';
 import { accountQuery } from '@/lib/account-query';
 import { prepareSpin, revealSpinSession, spin } from '@/lib/slot.functions';
-import { SLOT_BET_VALUES, SLOT_PAYLINES, SLOT_SPIN_COUNTS, clientSeedSchema, type PaylineId, type WinningLine } from '@/lib/slot-engine';
+import { SLOT_BET_VALUES, SLOT_PAYLINES, SLOT_SPIN_COUNTS, SLOT_WIN_CHANCE, clientSeedSchema, type PaylineId, type WinningLine } from '@/lib/slot-engine';
 import { useI18n } from '@/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -231,7 +231,7 @@ export function SlotGame({ gameId, gameName }: { gameId: string; gameName: strin
   }
 
   const money = (value: number) => new Intl.NumberFormat(lang === 'ru' ? 'ru-RU' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
-  const multiplier = (session?.rtp ?? 96) / 25;
+  const multiplier = (session?.rtp ?? 96) / 100 / SLOT_WIN_CHANCE;
   const winningPositions = new Set((winResult?.lines ?? []).flatMap((win) => SLOT_PAYLINES.find((line) => line.id === win.line)?.positions.map(([reel, row]) => `${reel}-${row}`) ?? []));
   const lineName = (line: PaylineId) => line === 'middle' ? t.middleLine : line === 'diagonalDown' ? t.diagonalDown : t.diagonalUp;
 

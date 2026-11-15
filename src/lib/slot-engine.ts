@@ -5,7 +5,8 @@ export const SLOT_SPIN_COUNTS = [1, 10, 100] as const;
 export const SLOT_SYMBOLS = 6;
 export const SPIN_RATE_LIMIT = 5;
 export const SPIN_RATE_WINDOW_SECONDS = 10;
-const WIN_CHANCE = 0.25;
+// Owner request: make wins 15% less frequent than the original 25% chance.
+export const SLOT_WIN_CHANCE = 0.2125;
 
 export const SLOT_PAYLINES = [
   { id: 'middle', positions: [[0, 1], [1, 1], [2, 1]] },
@@ -75,13 +76,13 @@ export async function generateSlotRounds(options: {
   rtp: number;
 }): Promise<SlotRound[]> {
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(options.serverSeed), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const winMultiplier = options.rtp / 100 / WIN_CHANCE;
+  const winMultiplier = options.rtp / 100 / SLOT_WIN_CHANCE;
   const rounds: SlotRound[] = [];
 
   for (let spin = 0; spin < options.spins; spin += 1) {
     const nonce = options.startNonce + spin;
     const first = await fairBytes(key, options.clientSeed, nonce, 0);
-    const won = uniform(first, 0) < WIN_CHANCE;
+    const won = uniform(first, 0) < SLOT_WIN_CHANCE;
     const selectedLine = SLOT_PAYLINES[Math.floor(uniform(first, 1) * SLOT_PAYLINES.length)] ?? SLOT_PAYLINES[0];
     const winSymbol = Math.floor(uniform(first, 2) * SLOT_SYMBOLS);
     let reels = candidateGrid(first);
