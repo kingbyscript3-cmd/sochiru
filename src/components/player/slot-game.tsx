@@ -4,7 +4,6 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowLeft, LoaderCircle, Repeat2, ShieldCheck, Square, Volume2, VolumeX } from 'lucide-react';
-import templeArt from '@/assets/lost-temple.jpg';
 import { accountQuery } from '@/lib/account-query';
 import { prepareSpin, revealSpinSession, spin } from '@/lib/slot.functions';
 import { SLOT_BET_VALUES, SLOT_PAYLINES, SLOT_SPIN_COUNTS, SLOT_WIN_CHANCE, clientSeedSchema, type PaylineId, type WinningLine } from '@/lib/slot-engine';
@@ -15,6 +14,7 @@ import { Label } from '@/components/ui/label';
 
 type Session = { sessionId: string; serverSeedHash: string; clientSeed: string; nonce: number; rtp: number };
 type WinResult = { count: number; payout: number; lines: WinningLine[] };
+const templeArt = '/images/lost-temple.jpg';
 const symbolCrops = [
   { x: 168, y: 273, w: 138, h: 120, name: 'Red scarab' },
   { x: 318, y: 400, w: 145, h: 120, name: 'Green scarab' },

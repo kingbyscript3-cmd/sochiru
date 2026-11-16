@@ -1,4 +1,5 @@
 # Implementation
+- [x] Serve every app image from repository-local public/images paths for external deploys; verify no _l5e references and successful image responses.
 - [ ] Replace the player-home carousel with a single ambient Lost Temple hero, transparent machine artwork, accessible play navigation, and reduced-motion support; keep other slot components available but disabled.
 - [x] Added an audited US$ 200 test adjustment to rei.investe@gmail.com and verified it in the player wallet with a real spin.
 - [x] Rebuild Lost Temple around its carousel artwork with 3×3 reels, central/diagonal server-paid lines, illustrated symbols, gold presentation, sequential reels, win effects, sound controls, and existing bottom controls.

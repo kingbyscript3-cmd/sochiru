@@ -5,7 +5,8 @@ import { Play } from 'lucide-react';
 import { slots } from '@/lib/slots';
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/i18n';
-import machineArt from '@/assets/lost-temple-machine.png';
+
+const machineArt = '/images/lost-temple-machine.png';
 
 const rays = [12, 29, 48, 67, 84];
 const dust = Array.from({ length: 18 }, (_, index) => ({
